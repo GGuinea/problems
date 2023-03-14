@@ -20,17 +20,12 @@ defmodule BoutiqueInventory do
   def update_names([], _old_word, _new_word), do: []
 
   def increase_quantity(item, count) do
-    new_sizes =
-      Enum.reduce(item.quantity_by_size, %{}, fn {size, last_count}, sizes ->
-        Map.put(sizes, size, last_count + count)
-      end)
-
-    Map.put(item, :quantity_by_size, new_sizes)
+    %{item | quantity_by_size: Map.new(item.quantity_by_size, fn {k, v} -> {k, v + count} end)}
   end
 
   def total_quantity(item) do
-    Enum.reduce(item.quantity_by_size, 0, fn {size, count}, acc -> 
-    acc = acc + count
-  end)
+    Enum.reduce(item.quantity_by_size, 0, fn {_size, count}, acc ->
+      acc + count
+    end)
   end
 end
