@@ -20,7 +20,8 @@ defmodule BoutiqueInventory do
   def update_names([], _old_word, _new_word), do: []
 
   def increase_quantity(item, count) do
-    %{item | quantity_by_size: Map.new(item.quantity_by_size, fn {k, v} -> {k, v + count} end)}
+    %{item | quantity_by_size: Map.new(item.quantity_by_size, 
+    fn {k, v} -> {k, v + count} end)}
   end
 
   def total_quantity(item) do
