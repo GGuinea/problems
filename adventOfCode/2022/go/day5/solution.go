@@ -41,12 +41,7 @@ func part1() {
 		makeMove(from, to, count, stacks)
 	}
 	var res string
-	fmt.Println(stacks)
-	for key, _ := range stacks {
-		fmt.Println(key)
-	}
-	for i :=1; i < len(stacks)+1; i++ {
-		fmt.Println(stacks[i])
+	for i := 1; i < len(stacks)+1; i++ {
 		res += strings.Join(stacks[i][:1], "")
 	}
 	fmt.Println(res)
