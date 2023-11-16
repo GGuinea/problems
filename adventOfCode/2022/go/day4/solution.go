@@ -23,18 +23,22 @@ func readFile(fileName string) []string {
 	return lines
 }
 
+func parseInput(line string) (int, int, int, int) {
+	splittedByComma := strings.Split(line, ",")
+	xSplitted := strings.Split(splittedByComma[0], "-")
+	ySplitted := strings.Split(splittedByComma[1], "-")
+	x1, _ := strconv.Atoi(xSplitted[0])
+	x2, _ := strconv.Atoi(xSplitted[1])
+	y1, _ := strconv.Atoi(ySplitted[0])
+	y2, _ := strconv.Atoi(ySplitted[1])
+	return x1, x2, y1, y2
+}
+
 func part1() {
 	lines := readFile("input")
 	res := 0
 	for _, line := range lines {
-		splittedByComma := strings.Split(line, ",")
-		xSplitted := strings.Split(splittedByComma[0], "-")
-		ySplitted := strings.Split(splittedByComma[1], "-")
-		x1, _ := strconv.Atoi(xSplitted[0])
-		x2, _ := strconv.Atoi(xSplitted[1])
-		y1, _ := strconv.Atoi(ySplitted[0])
-		y2, _ := strconv.Atoi(ySplitted[1])
-		if contains(x1, x2, y1, y2) {
+		if contains(parseInput(line)) {
 			res++
 		}
 	}
@@ -51,6 +55,31 @@ func contains(x1, x2, y1, y2 int) bool {
 	return false
 }
 
+func part2() {
+	lines := readFile("input")
+	res := 0
+	for _, line := range lines {
+		if continsPart(parseInput(line)) {
+			res++
+		}
+	}
+	fmt.Println(res)
+}
+
+func continsPart(x1, x2, y1, y2 int) bool {
+	if y1 >= x1 && y1 <= x2 {
+		return true
+	} else if y2 >= x1 && y2 <= x2 {
+		return true
+	} else if x1 <= y1 && x2 >= y2 {
+		return true
+	} else if x1 >= y1 && x2 <= y2 {
+		return true
+	}
+
+	return false
+}
+
 func main() {
-	part1()
+	part2()
 }
