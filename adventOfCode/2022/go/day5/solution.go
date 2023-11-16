@@ -33,6 +33,7 @@ func part1() {
 		}
 		parseStacks(line, stacks)
 	}
+
 	for _, line := range lines {
 		if !strings.Contains(line, "move") {
 			continue
@@ -40,6 +41,7 @@ func part1() {
 		from, to, count := parseMoves(line)
 		makeMove(from, to, count, stacks)
 	}
+
 	var res string
 	for i := 1; i < len(stacks)+1; i++ {
 		res += strings.Join(stacks[i][:1], "")
@@ -80,6 +82,12 @@ func parseMoves(line string) (int, int, int) {
 	return from, to, count
 }
 
+func part2() {
+	fmt.Println("Too lazy to implement part 2")
+	panic(1)
+}
+
 func main() {
 	part1()
+	part2()
 }
