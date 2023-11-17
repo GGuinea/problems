@@ -52,6 +52,13 @@ func isUnique(window []string) bool {
 	return true
 }
 
+func part2() {
+	lines := readFile("input")
+	res := findUniqueSlidingWindow(lines[0], 14)
+	fmt.Println(res)
+}
+
 func main() {
 	part1()
+	part2()
 }
