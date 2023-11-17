@@ -39,18 +39,13 @@ type Directory struct {
 	Size   int
 }
 
+const TOTAL_SIZE = 70000000
+const NEEDED_SIZE = 30000000
+
 func newRoot() *Directory {
 	directoryList := make([]*Directory, 0)
 	filesList := make([]*File, 0)
 	return &Directory{Name: "/", Parent: nil, Child: directoryList, Files: filesList}
-}
-
-func part1() {
-	lines := readFile("input")
-	tree := buildTree(lines)
-	calculateDirSizesWithDfs(tree)
-	res := findDirsWithSizeIsLessThan(tree, 100000)
-	fmt.Println(res)
 }
 
 func buildTree(lines []string) *Directory {
@@ -90,17 +85,6 @@ func buildTree(lines []string) *Directory {
 	return rootDirectory
 }
 
-func findDirsWithSizeIsLessThan(root *Directory, threshold int) int {
-	counter := 0
-	if (root.Size) < threshold {
-		counter += root.Size
-	}
-	for _, dir := range root.Child {
-		counter += findDirsWithSizeIsLessThan(dir, threshold)
-	}
-	return counter
-}
-
 func calculateDirSizesWithDfs(root *Directory) int {
 	files := root.Files
 	fileSize := 0
@@ -117,6 +101,47 @@ func calculateDirSizesWithDfs(root *Directory) int {
 	return root.Size
 }
 
+func part1() {
+	lines := readFile("input")
+	tree := buildTree(lines)
+	calculateDirSizesWithDfs(tree)
+	res := findDirsWithSizeIsLessThan(tree, 100000)
+	fmt.Println(res)
+}
+
+func findDirsWithSizeIsLessThan(root *Directory, threshold int) int {
+	counter := 0
+	if (root.Size) < threshold {
+		counter += root.Size
+	}
+	for _, dir := range root.Child {
+		counter += findDirsWithSizeIsLessThan(dir, threshold)
+	}
+	return counter
+}
+
+
+func part2() {
+	lines := readFile("input")
+	tree := buildTree(lines)
+	currentTotalSize := calculateDirSizesWithDfs(tree)
+	freeSpace := TOTAL_SIZE - currentTotalSize
+	spaceToFind := NEEDED_SIZE - freeSpace
+	smallestThatFit := findSmallestDirThatFit(tree, spaceToFind, currentTotalSize + 1)
+	fmt.Println(smallestThatFit)
+}
+
+func findSmallestDirThatFit(root *Directory, spaceToFind, currentSmallest int) int {
+	if root.Size >= spaceToFind && root.Size < currentSmallest {
+		currentSmallest = root.Size
+	}
+
+	for _, dir := range root.Child {
+		currentSmallest = findSmallestDirThatFit(dir, spaceToFind, currentSmallest)
+	}
+	return currentSmallest
+}
+
 func main() {
-	part1()
+	part2()
 }
