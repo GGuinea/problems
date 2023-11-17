@@ -83,11 +83,38 @@ func parseMoves(line string) (int, int, int) {
 }
 
 func part2() {
-	fmt.Println("Too lazy to implement part 2")
-	panic(1)
+	lines := readFile("input")
+	stacks := make(map[int][]string)
+	for _, line := range lines {
+		if strings.Contains(line, "move") {
+			break
+		}
+		parseStacks(line, stacks)
+	}
+
+	for _, line := range lines {
+		if !strings.Contains(line, "move") {
+			continue
+		}
+		from, to, count := parseMoves(line)
+		makeMoveNewCrateMover(from, to, count, stacks)
+	}
+
+	var res string
+	for i := 1; i < len(stacks)+1; i++ {
+		res += strings.Join(stacks[i][:1], "")
+	}
+	fmt.Println(res)
+}
+
+func makeMoveNewCrateMover(from, to, count int, stacks map[int][]string) {
+	movedObjects := make([]string, count)
+	copy(movedObjects, stacks[from][:count])
+	stacks[to] = append(movedObjects, stacks[to]...)
+	stacks[from] = stacks[from][count:]
 }
 
 func main() {
-	part1()
+	//part1()
 	part2()
 }
