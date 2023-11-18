@@ -29,60 +29,71 @@ func readFile(fileName string) []string {
 func part1() {
 	lines := readFile("input")
 	treeMap := parseMap(lines)
-	visibleTrees := findNoOfTreesVisibleFromOutside(treeMap)
+	visibleTrees, _ := findNoOfTreesVisibleFromOutside(treeMap)
 	fmt.Println(visibleTrees)
 }
 
-func findNoOfTreesVisibleFromOutside(treeMap [][]int) int {
+func part2() {
+	lines := readFile("input")
+	treeMap := parseMap(lines)
+	_, maxVision := findNoOfTreesVisibleFromOutside(treeMap)
+	fmt.Println(maxVision)
+}
+
+func findNoOfTreesVisibleFromOutside(treeMap [][]int) (int, int) {
 	treesVisible := 0
+	maxViewFactor := 0
 
 	for i, row := range treeMap {
 		for j, treeHeight := range row {
-			if i == 0 || j == 0 || i == len(treeMap)-1 || j == len(treeMap)-1 {
-				treesVisible++
-				continue
-			}
-			visible := isVisible(treeHeight, i, j, treeMap)
+			visible, viewFactor := isVisible(treeHeight, i, j, treeMap)
 			if visible {
 				treesVisible++
 			}
+			if maxViewFactor < viewFactor {
+				maxViewFactor = viewFactor
+			}
 		}
 	}
 
-	return treesVisible
+	return treesVisible, maxViewFactor
 }
 
-func isVisible(treeHeight, i, j int, grid [][]int) bool {
-	rightPart := grid[i][j+1:]
+func isVisible(treeHeight, i, j int, grid [][]int) (bool, int) {
+	transponed := transpone(grid)
+
 	leftPart := grid[i][:j]
-	transoned := transpone(grid)
+	rightPart := grid[i][j+1:]
 
-	col := make([]int, len(grid[0]))
+	topPart := transponed[j][:i]
+	bottomPart := transponed[j][i+1:]
 
-	for c := range grid {
-		col[c] = grid[c][j]
-	}
-
-	bottomPart := transoned[j][:i]
-	topPart := transoned[j][i+1:]
-	visibleFromRight := isHigherThanSlice(treeHeight, rightPart)
-	visibleFromLeft := isHigherThanSlice(treeHeight, leftPart)
-	visibleFromTop := isHigherThanSlice(treeHeight, topPart)
-	visibleFromBottom := isHigherThanSlice(treeHeight, bottomPart)
+	visibleFromRight, rightView := isHigherThanSlice(treeHeight, rightPart, false)
+	visibleFromLeft, leftView := isHigherThanSlice(treeHeight, leftPart, true)
+	visibleFromTop, topView := isHigherThanSlice(treeHeight, topPart, true)
+	visibleFromBottom, bottomView := isHigherThanSlice(treeHeight, bottomPart, false)
 	res := visibleFromLeft || visibleFromRight || visibleFromTop || visibleFromBottom
-	return res
+	return res, rightView * leftView * topView * bottomView
 }
 
-func isHigherThanSlice(height int, other []int) bool {
-	if len(other) == 0 {
-		return true
+func isHigherThanSlice(height int, other1 []int, invert bool) (bool, int) {
+	other := make([]int, len(other1))
+	copy(other, other1)
+
+	if invert {
+		for i, j := 0, len(other)-1; i < j; i, j = i+1, j-1 {
+			other[i], other[j] = other[j], other[i]
+		}
 	}
+
+	distance := 1
 	for _, otherTreeHeight := range other {
 		if height <= otherTreeHeight {
-			return false
+			return false, distance
 		}
+		distance++
 	}
-	return true
+	return true, distance - 1
 }
 
 func transpone(grid [][]int) [][]int {
@@ -117,5 +128,6 @@ func parseMap(lines []string) [][]int {
 }
 
 func main() {
-	part1()
+	//part1()
+	part2()
 }
