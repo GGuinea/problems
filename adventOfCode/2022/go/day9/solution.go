@@ -19,7 +19,7 @@ type Point struct {
 	Y int
 }
 
-func (p *Point) NewPoint(x, y int) Point {
+func NewPoint(x, y int) Point {
 	return Point{X: x, Y: y}
 }
 
@@ -39,6 +39,19 @@ func (pc *PointContainer) Save(newPoint Point) {
 		}
 	}
 	pc.Container = append(pc.Container, newPoint)
+}
+
+type Snake struct {
+	SnakeParts []*Point
+	Length     int
+}
+
+func newSnake(length int) *Snake {
+	var snake []*Point
+	for i := 0; i < length; i++ {
+		snake = append(snake, &Point{X: 0, Y: 0})
+	}
+	return &Snake{SnakeParts: snake, Length: length}
 }
 
 func readFile(fileName string) []string {
@@ -72,7 +85,6 @@ func findSafePath(commands []Command, pc *PointContainer) {
 	tail := &Point{X: 0, Y: 0}
 	for _, command := range commands {
 		makeMove(head, tail, command, pc)
-		moveTail(head, tail)
 	}
 }
 
@@ -85,11 +97,47 @@ func makeMove(head, tail *Point, command Command, pc *PointContainer) {
 	}
 }
 
+func part2() {
+	lines := readFile("input")
+	commands := parseCommands(lines)
+	snake := newSnake(10)
+	poinContainer := NewPointContainer()
+	findSnakeSafePath(commands, poinContainer, snake)
+	fmt.Println(len(poinContainer.Container))
+}
+
+func findSnakeSafePath(commands []Command, pc *PointContainer, snake *Snake) {
+	for _, command := range commands {
+		makeSnakeMove(snake.SnakeParts[0], command, pc, snake)
+	}
+}
+
+func makeSnakeMove(head *Point, command Command, pc *PointContainer, snake *Snake) {
+	for i := 0; i < command.Count; i++ {
+		moveHead(head, command.Direction)
+		for i := 0; i < snake.Length-1; i++ {
+			moveTail(snake.SnakeParts[i], snake.SnakeParts[i+1])
+		}
+		pc.Save(*snake.SnakeParts[snake.Length-1])
+	}
+}
+
 func moveTail(head, tail *Point) {
-	xDistance := math.Abs(float64(calculateAbsDistance(head.X, tail.X)))
-	yDistance := math.Abs(float64(calculateAbsDistance(head.Y, tail.Y)))
+	xDistance := math.Abs(float64(calculateDistance(head.X, tail.X)))
+	yDistance := math.Abs(float64(calculateDistance(head.Y, tail.Y)))
 	if xDistance <= 1 && yDistance <= 1 {
 		return
+	} else if xDistance >= 2 && yDistance >= 2 {
+		if head.X > tail.X {
+			tail.X = head.X - 1
+		} else if head.X < tail.X {
+			tail.X = head.X + 1
+		}
+		if head.Y > tail.Y {
+			tail.Y = head.Y - 1
+		} else if head.Y < tail.Y {
+			tail.Y = head.Y + 1
+		}
 	} else if xDistance > 1 {
 		if head.X > tail.X {
 			tail.X = head.X - 1
@@ -109,19 +157,8 @@ func moveTail(head, tail *Point) {
 	}
 }
 
-func calculateAbsDistance(x1, x2 int) int {
-	return x1 - x2
-}
-
 func calculateDistance(x1, x2 int) int {
 	return x1 - x2
-}
-
-func calculatePointDistance(pointX, pointY, point2X, point2Y int) (int, int) {
-	x := calculateDistance(pointX, point2X)
-	y := calculateDistance(pointY, point2Y)
-
-	return x, y
 }
 
 func moveHead(head *Point, direction string) {
@@ -160,5 +197,6 @@ func parseCommands(lines []string) []Command {
 }
 
 func main() {
-	part1()
+	//part1()
+	part2()
 }
