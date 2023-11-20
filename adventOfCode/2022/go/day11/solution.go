@@ -67,6 +67,39 @@ func part1(fileName string) {
 	fmt.Println(maxs[len(maxs)-1] * maxs[len(maxs)-2])
 }
 
+func part2(fileName string) {
+	lines := readFile(fileName)
+	monkeys := parseInput(lines)
+	var lcm int = 1
+	for i := 0; i < len(monkeys); i++ {
+		lcm *= monkeys[i].TestValue
+	}
+	for j := 0; j < 10000; j++ {
+		for i := 0; i < len(monkeys); i++ {
+			monkey := monkeys[i]
+			for _, item := range monkey.StartingItems {
+				dest, currItem := handleItemPart2(item, monkey, lcm)
+				destMonkey := monkeys[dest]
+				destMonkey.StartingItems = append(destMonkey.StartingItems, currItem)
+				monkeys[dest] = destMonkey
+			}
+			newStartingItems := make([]int, 0)
+			itemsCount := len(monkey.StartingItems)
+			monkey.StartingItems = newStartingItems
+			monkey.InspectedItems += itemsCount
+			monkeys[i] = monkey
+		}
+	}
+
+	maxs := make([]int, 0)
+
+	for i := 0; i < len(monkeys); i++ {
+		maxs = append(maxs, monkeys[i].InspectedItems)
+	}
+	slices.Sort(maxs)
+	fmt.Println(maxs[len(maxs)-1] * maxs[len(maxs)-2])
+}
+
 func parseInput(lines []string) map[int]Monkey {
 	monkeys := make(map[int]Monkey)
 	var currentMonkey Monkey
@@ -140,6 +173,16 @@ func handleItem(item int, monkey Monkey) (int, int) {
 	}
 }
 
+func handleItemPart2(item int, monkey Monkey, div int) (int, int) {
+	item = makeOperation(monkey.Operation, monkey.OperationValue, item, monkey.OperationByItself)
+	item = item % div
+
+	if item%monkey.TestValue == 0 {
+		return monkey.DestinationIfTrue, item
+	} else {
+		return monkey.DestinationIfFalse, item
+	}
+}
 func makeOperation(operation string, operand int, current int, byItself bool) int {
 	switch operation {
 	case "*":
@@ -170,5 +213,6 @@ func printMonkey(monkey Monkey) {
 
 func main() {
 	fileName := os.Args[1]
-	part1(fileName)
+	//part1(fileName)
+	part2(fileName)
 }
