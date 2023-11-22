@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"slices"
 )
 
 const S int = 83
@@ -84,14 +85,17 @@ func part1(fileName string) {
 		Start:           start,
 		End:             end,
 	}
+	dist := traverseMaze(maze)
+	fmt.Println(dist)
+}
 
+func traverseMaze(maze Maze) int {
 	for len(maze.Queue) > 0 {
 		point, queue := dequeue(maze.Queue)
 		maze.Queue = queue
 
 		if point.X == maze.End.X && point.Y == maze.End.Y {
-			fmt.Println(point.dist)
-			return
+			return point.dist
 		}
 
 		if maze.Visited[point.X][point.Y] == VISITED_MARKER {
@@ -114,6 +118,41 @@ func part1(fileName string) {
 
 		if canVisit(&maze, point.X, point.Y-1, maze.Labyrinth[point.X][point.Y]) {
 			maze.Queue = enqueue(maze.Queue, Point{X: point.X, Y: point.Y - 1, dist: point.dist + 1})
+		}
+	}
+	return -1
+}
+
+func part2(fileName string) {
+	lines := readFile(fileName)
+	labyrinth, startingPoints, end := parseInputPart2(lines)
+
+	outputs := make([]int, 0)
+
+	visited := make([][]int, len(labyrinth))
+	for _, startingPoint := range startingPoints {
+
+		for i := range visited {
+			visited[i] = make([]int, len(labyrinth[0]))
+
+		}
+		queue := []Point{startingPoint}
+		maze := Maze{
+			Labyrinth:       labyrinth,
+			Found:           false,
+			ShorthestLength: math.MaxInt,
+			Visited:         visited,
+			Queue:           queue,
+			End:             end,
+		}
+		dist := traverseMaze(maze)
+		outputs = append(outputs, dist)
+	}
+	slices.Sort(outputs)
+	for _, output := range outputs {
+		if output != -1 {
+			fmt.Println(output)
+			break
 		}
 	}
 }
@@ -167,7 +206,35 @@ func parseInput(lines []string) ([][]int, int, int, int, int) {
 	return labyrinth, startingI, startingJ, endI, endJ
 }
 
+func parseInputPart2(lines []string) ([][]int, []Point, Point) {
+	labyrinth := make([][]int, 0)
+
+	endI := 0
+	endJ := 0
+
+	startingPoints := make([]Point, 0)
+
+	for i, line := range lines {
+		arr := make([]int, 0)
+		for j, lett := range line {
+			if int(lett) == 97 && ((i == 0 || i == len(lines)) || (j == 0 || j == len(line))) {
+				startingPoints = append(startingPoints, Point{X: i, Y: j})
+				arr = append(arr, 97)
+			} else if int(lett) == E {
+				endI = i
+				endJ = j
+				arr = append(arr, 122)
+			} else {
+				arr = append(arr, int(lett))
+			}
+		}
+		labyrinth = append(labyrinth, arr)
+	}
+
+	return labyrinth, startingPoints, Point{X: endI, Y: endJ}
+}
+
 func main() {
 	fileName := os.Args[1]
-	part1(fileName)
+	part2(fileName)
 }
