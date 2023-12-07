@@ -87,31 +87,20 @@ func part2(filename string) int {
 	gamesList := make([]Game, 0)
 	cardCounter := make([]int, 0)
 
-	stack := Stack{}
 	for i, line := range lines {
 		game := parseGames(line, i)
 		gamesList = append(gamesList, game)
 		cardCounter = append(cardCounter, 1)
-		stack.Push(i)
 	}
 
-	stack.Sort()
-
 	res := 0
-	for {
-		stack.Sort()
-		gameToPlay, multiplier := stack.Pop()
-		res += multiplier
-		game := gamesList[gameToPlay]
+	for i := 0; i < len(gamesList); i++ {
+		res += cardCounter[i]
+		game := gamesList[i]
 		if game.Result != 0 {
-			for k := 0; k < multiplier; k++ {
-				for j := 1; j <= game.Result; j++ {
-					stack.Push(j + game.Number)
-				}
+			for j := 1; j <= game.Result; j++ {
+				cardCounter[i+j] += cardCounter[i]
 			}
-		}
-		if len(stack.elements) == 0 {
-			break
 		}
 	}
 	return res
