@@ -14,9 +14,36 @@ type Game struct {
 	PlayerNumbers  []int
 	WinningNumbers []int
 	Result         int
+	Number         int
 }
 
-var PowerOfTwo = map[int]int{}
+type Stack struct {
+	elements []int
+}
+
+func (s *Stack) Push(element int) {
+	s.elements = slices.Insert(s.elements, 0, element)
+}
+
+func (s *Stack) Pop() (int, int) {
+	elem := s.elements[0]
+	count := s.countElements(elem)
+	s.elements = s.elements[count:]
+	return elem, count
+}
+
+func (s *Stack) countElements(x int) int {
+	for i, elem := range s.elements {
+		if elem > x {
+			return i
+		}
+	}
+	return len(s.elements)
+}
+
+func (s *Stack) Sort() {
+	slices.Sort(s.elements)
+}
 
 func readFile(fileName string) []string {
 	file, err := os.Open(fileName)
@@ -41,7 +68,7 @@ func part1(filename string) int {
 	gamesList := make([]Game, 0)
 
 	for i, line := range lines {
-		game := parseGames(line, i+1)
+		game := parseGames(line, i)
 		gamesList = append(gamesList, game)
 	}
 
@@ -55,8 +82,43 @@ func part1(filename string) int {
 	return res
 }
 
+func part2(filename string) int {
+	lines := readFile(filename)
+	gamesList := make([]Game, 0)
+	cardCounter := make([]int, 0)
+
+	stack := Stack{}
+	for i, line := range lines {
+		game := parseGames(line, i)
+		gamesList = append(gamesList, game)
+		cardCounter = append(cardCounter, 1)
+		stack.Push(i)
+	}
+
+	stack.Sort()
+
+	res := 0
+	for {
+		stack.Sort()
+		gameToPlay, multiplier := stack.Pop()
+		res += multiplier
+		game := gamesList[gameToPlay]
+		if game.Result != 0 {
+			for k := 0; k < multiplier; k++ {
+				for j := 1; j <= game.Result; j++ {
+					stack.Push(j + game.Number)
+				}
+			}
+		}
+		if len(stack.elements) == 0 {
+			break
+		}
+	}
+	return res
+}
+
 func parseGames(line string, i int) Game {
-	 _, removedCard,_:= strings.Cut(line, ": ")
+	_, removedCard, _ := strings.Cut(line, ": ")
 	winningAndYours := strings.Split(removedCard, " | ")
 	winningNumbersAsString := strings.Split(winningAndYours[0], " ")
 	yoursNumbersAsString := strings.Split(winningAndYours[1], " ")
@@ -98,10 +160,11 @@ func parseGames(line string, i int) Game {
 		}
 	}
 
-	return Game{PlayerNumbers: yourNumbers, WinningNumbers: winningNumbers, Result: contained}
+	return Game{PlayerNumbers: yourNumbers, WinningNumbers: winningNumbers, Result: contained, Number: i}
 }
 
 func main() {
 	fileName := os.Args[1]
-	fmt.Println(part1(fileName))
+	//fmt.Println(part1(fileName))
+	fmt.Println(part2(fileName))
 }
