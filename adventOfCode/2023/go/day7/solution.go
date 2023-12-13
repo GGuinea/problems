@@ -227,11 +227,89 @@ func newHand(cards, bid string) CamelGame {
 	return game
 }
 
-func parseGames(lines []string) []CamelGame {
+func getBestHand(cards []string) HandType {
+	occurances := make(map[string]int, 0)
+	jokerCounter := 0
+	for _, lett := range cards {
+		if lett == "J" {
+			jokerCounter++
+			continue
+		}
+		occurances[lett]++
+	}
+
+	game := CamelGame{Cards: strings.Join(cards, "")}
+
+	if len(occurances) == 0 {
+		game.getHandType()
+	}
+
+	mostCommon := "J"
+	mostCommonVal := 0
+	for k, occ := range occurances {
+		if mostCommonVal < occ {
+			mostCommonVal = occ
+			mostCommon = k
+		}
+	}
+
+	occurances[mostCommon] += jokerCounter
+
+	newCards := strings.Join(cards, "")
+	newCards = strings.ReplaceAll(newCards, "J", mostCommon)
+
+	game = CamelGame{Cards: newCards}
+	return game.getHandType()
+}
+
+func newHandPart2(cards, bid string) CamelGame {
+	var game CamelGame
+	bidConv, err := strconv.Atoi(bid)
+	if err != nil {
+		panic(2)
+	}
+	game.Cards = cards
+	game.BID = bidConv
+
+	splitCards := strings.Split(cards, "")
+	game.HandType = getBestHand(splitCards)
+
+	split := strings.Split(cards, "")
+	cardsAsValue := make([]int, 0)
+	for i := range split {
+		if split[i] == "A" {
+			cardsAsValue = append(cardsAsValue, 14)
+		} else if split[i] == "K" {
+			cardsAsValue = append(cardsAsValue, 13)
+		} else if split[i] == "Q" {
+			cardsAsValue = append(cardsAsValue, 12)
+		} else if split[i] == "J" {
+			cardsAsValue = append(cardsAsValue, 1)
+		} else if split[i] == "T" {
+			cardsAsValue = append(cardsAsValue, 10)
+		} else {
+			conv, err := strconv.Atoi(split[i])
+			if err != nil {
+				panic(3)
+			}
+			cardsAsValue = append(cardsAsValue, conv)
+		}
+	}
+
+	game.CardsAsValue = cardsAsValue
+
+	return game
+}
+
+func parseGames(lines []string, part int) []CamelGame {
 	games := make([]CamelGame, 0)
 	for _, line := range lines {
 		split := strings.Split(line, " ")
-		games = append(games, newHand(split[0], split[1]))
+		if part == 1 {
+			games = append(games, newHand(split[0], split[1]))
+		} else {
+			games = append(games, newHandPart2(split[0], split[1]))
+		}
 	}
 	return games
 }
@@ -252,7 +330,7 @@ func compareCardByCard(a, b CamelGame) int {
 
 func part1(filename string) int {
 	lines := readFile(filename)
-	games := parseGames(lines)
+	games := parseGames(lines, 1)
 	slices.SortFunc(games, func(a, b CamelGame) int {
 		if a.HandType > b.HandType {
 			return 1
@@ -271,11 +349,27 @@ func part1(filename string) int {
 }
 
 func part2(filename string) int {
-	return -1
+	lines := readFile(filename)
+	games := parseGames(lines, 2)
+	slices.SortFunc(games, func(a, b CamelGame) int {
+		if a.HandType > b.HandType {
+			return 1
+		} else if a.HandType < b.HandType {
+			return -1
+		} else {
+			return compareCardByCard(a, b)
+		}
+	})
+	res := 0
+	for i := 1; i <= len(games); i++ {
+		res += i * games[i-1].BID
+	}
+
+	return res
 }
 
 func main() {
 	fileName := os.Args[1]
 	fmt.Println(part1(fileName))
-	// fmt.Println(part2(fileName))
+	fmt.Println(part2(fileName))
 }

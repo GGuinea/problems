@@ -89,7 +89,7 @@ func TestShouldCompletePart1WithProperInput(t *testing.T) {
 
 func TestShouldCompletePart2WithTestInput(t *testing.T) {
 	testFileName := "test_input"
-	expected := 71503
+	expected := 5905
 	res := part2(testFileName)
 
 	if res != expected {
@@ -99,7 +99,7 @@ func TestShouldCompletePart2WithTestInput(t *testing.T) {
 
 func TestShouldCompletePart2WithProperInput(t *testing.T) {
 	testFileName := "input"
-	expected := 248559379
+	expected := 249631254
 	res := part2(testFileName)
 
 	if res != expected {
