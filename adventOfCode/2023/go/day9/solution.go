@@ -81,8 +81,32 @@ func part1(filename string) int {
 	return res
 }
 
+func calculateMissingPartsAtBeginning(numberLine []int) int {
+	nextLine := make([]int, 0)
+
+	for i := 0; i < len(numberLine)-1; i++ {
+		diff := numberLine[i+1] - numberLine[i]
+		nextLine = append(nextLine, diff)
+	}
+
+	if all(nextLine, 0) {
+		return numberLine[0]
+	} else {
+		return numberLine[0] - calculateMissingPartsAtBeginning(nextLine)
+	}
+}
+
 func part2(filename string) int {
-	return -1
+	lines := readFile(filename)
+	numbers := getNumbers(lines)
+	res := 0
+
+	for _, v := range numbers {
+		sum := calculateMissingPartsAtBeginning(v)
+		res += sum
+	}
+
+	return res
 }
 
 func main() {
