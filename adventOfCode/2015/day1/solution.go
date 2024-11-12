@@ -17,10 +17,9 @@ func readFile(filename string) string {
 	return string(data)
 }
 
-func part1(filename string) int {
-	dataFromFile := readFile(filename)
+func part1Solution(input string) int {
 	currentFloor := 0
-	for _, v := range dataFromFile {
+	for _, v := range input {
 		if v == '(' {
 			currentFloor++
 		} else if v == ')' {
@@ -28,4 +27,29 @@ func part1(filename string) int {
 		}
 	}
 	return currentFloor
+}
+
+func handlePart1(filename string) int {
+	dataFromFile := readFile(filename)
+	return part1Solution(dataFromFile)
+}
+
+func part2Solution(input string) int {
+	currentFloor := 0
+	for idx, v := range input {
+		if v == '(' {
+			currentFloor++
+		} else if v == ')' {
+			currentFloor--
+		}
+		if currentFloor == -1 {
+			return idx + 1
+		}
+	}
+	return -1
+}
+
+func handlePart2(filename string) int {
+	dataFromFile := readFile(filename)
+	return part2Solution(dataFromFile)
 }
