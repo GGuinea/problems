@@ -2,6 +2,7 @@ package solution
 
 import (
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -23,6 +24,85 @@ func part1() int {
 	input := readFile("input")
 	return handlePart1(input)
 }
+
+func part1_dfs() (int, int) {
+	input := readFile("input")
+	return handlePart1_dfs(input)
+}
+
+type graph map[string]map[string]int
+
+func handlePart1_dfs(input string) (int, int) {
+	routes := getRoutesGraph(input)
+	cities := getCitiesFromGraph(routes)
+
+	return solve(routes, cities)
+}
+
+
+func dfs(currentCity string, visited map[string]bool, distance int, count int, noOfCities int, distances *[]int, routes graph) {
+	if count == noOfCities {
+		*distances = append(*distances, distance)
+		return
+	}
+
+	for neighbor, dist := range routes[currentCity] {
+		if !visited[neighbor] {
+			visited[neighbor] = true
+			dfs(neighbor, visited, dist + distance, count+1, noOfCities, distances, routes)
+			visited[neighbor] = false
+		}
+	}
+}
+
+func solve(routes graph, cities []string) (int, int) {
+	distances := make([]int, 0)
+
+	for _, city := range cities {
+		visited := make(map[string]bool)
+		visited[city] = true
+		dfs(city,visited, 0, 1, len(cities), &distances, routes)
+	}
+
+
+	return slices.Min(distances), slices.Max(distances)
+}
+
+func getCitiesFromGraph(routes graph) []string {
+	var cities []string
+	for city := range routes {
+		cities = append(cities, city)
+	}
+	return cities
+}
+
+func getRoutesGraph(input string) map[string]map[string]int {
+	routes := make(graph)
+
+	lines := strings.Split(input, "\n")
+	for _, line := range lines {
+		if len(line) == 0 {
+			continue
+		}
+		split := strings.Split(line, " = ")
+		cities := strings.Split(split[0], " to ")
+		distance, err := strconv.Atoi(split[1])
+		if err != nil {
+			panic(err)
+		}
+		if routes[cities[0]] == nil {
+			routes[cities[0]] = make(map[string]int)
+		}
+		if routes[cities[1]] == nil {
+			routes[cities[1]] = make(map[string]int)
+		}
+		routes[cities[0]][cities[1]] = distance
+		routes[cities[1]][cities[0]] = distance
+	}
+	return routes
+
+}
+
 
 func part2() int {
 	input := readFile("input")
